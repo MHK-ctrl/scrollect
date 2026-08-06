@@ -1,0 +1,168 @@
+# SCROLLECT CI — backend typecheck/tests + Android mock/live builds.
+#
+# Design notes:
+#   • Triggers on push to `main` and every PR; docs-only changes skip CI entirely.
+#   • Per-job `paths` filters: a backend-only PR runs only Job A, an Android-only
+#     PR runs only Jobs B+C, a both-changed PR runs all three.
+#   • The live flavor never falls back to mock: if the SCROLLECT_LIVE_BASE_URL
+#     secret is unset, Job C fails with a clear message. (Known consequence: PRs
+#     from forks — which don't inherit repo secrets — will fail Job C by design.)
+#   • Gradle + npm caches are handled by gradle/actions/setup-gradle@v4 and
+#     actions/setup-node@v4 respectively; each job stays well under 15 min.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'SCROLLECT-SPEC.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'SCROLLECT-SPEC.md'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job A — backend: typecheck + unit tests. No Postgres/Redis needed (tests run
+  # against the in-memory Db / MockIgClient).
+  # ---------------------------------------------------------------------------
+  backend:
+    name: Backend (typecheck + tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # backend-only PRs skip the Android jobs entirely
+    paths:
+      - 'backend/**'
+      - 'shared/**'
+      - '.github/workflows/ci.yml'
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test
+
+  # ---------------------------------------------------------------------------
+  # Job B — Android (mock flavor): assemble, unit tests, instrumented-test APK,
+  # upload the debug APK. Fully offline — no secrets required.
+  # ---------------------------------------------------------------------------
+  android-mock:
+    name: Android (mock)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    paths:
+      - 'android/**'
+      - '.github/workflows/ci.yml'
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK (cmdline-tools, API 35)
+        uses: android-actions/setup-android@v3
+        with:
+          sdk-version: '35'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Assemble mock debug APK
+        run: ./gradlew :app:assembleMockDebug
+
+      - name: Mock unit tests
+        run: ./gradlew :app:testMockDebugUnitTest
+
+      - name: Mock instrumented smoke-test APK
+        run: ./gradlew :app:assembleMockDebugAndroidTest
+
+      - name: Upload mock debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-mock-debug-apk
+          path: android/app/build/outputs/apk/mock/debug/app-mock-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Job C — Android (live flavor): same setup but with the real backend base URL
+  # from the SCROLLECT_LIVE_BASE_URL secret. Unset secret => hard fail, never a
+  # silent fallback to mock.
+  # ---------------------------------------------------------------------------
+  android-live:
+    name: Android (live)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    paths:
+      - 'android/**'
+      - '.github/workflows/ci.yml'
+    defaults:
+      run:
+        working-directory: android
+    env:
+      SCROLLECT_LIVE_BASE_URL: ${{ secrets.SCROLLECT_LIVE_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK (cmdline-tools, API 35)
+        uses: android-actions/setup-android@v3
+        with:
+          sdk-version: '35'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Require SCROLLECT_LIVE_BASE_URL secret
+        run: |
+          if [ -z "$SCROLLECT_LIVE_BASE_URL" ]; then
+            echo "::error::SCROLLECT_LIVE_BASE_URL is not set. The 'live' flavor fails fast by design (never falls back to mock). Add the secret under Settings → Secrets and variables → Actions, then re-run."
+            exit 1
+          fi
+
+      - name: Assemble live debug APK
+        run: ./gradlew :app:assembleLiveDebug -Pscrollect.liveBaseUrl="$SCROLLECT_LIVE_BASE_URL"
+
+      - name: Live wiring smoke tests
+        run: ./gradlew :app:testLiveDebugUnitTest -Pscrollect.liveBaseUrl="$SCROLLECT_LIVE_BASE_URL"
+
+      - name: Upload live debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-live-debug-apk
+          path: android/app/build/outputs/apk/live/debug/app-live-debug.apk
+          if-no-files-found: error
+          retention-days: 7

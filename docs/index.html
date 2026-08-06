@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrollect Privacy Policy</title>
+<style>
+  :root {
+    --ink: #1a1f2e;
+    --muted: #5b6478;
+    --accent: #6c4df6;
+    --accent-soft: #f1edff;
+    --bg: #ffffff;
+    --line: #e7e9f0;
+    --code-bg: #f4f5f9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  /* Header */
+  header.hero {
+    padding: 40px 0 32px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 36px;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid #e2daff;
+    border-radius: 999px;
+    padding: 4px 12px;
+    margin-bottom: 16px;
+  }
+  header.hero h1 {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .effective-date {
+    margin-top: 10px;
+    font-size: 15px;
+    color: var(--muted);
+  }
+  .effective-date strong { color: var(--ink); font-weight: 600; }
+  /* Contact section */
+  .contact-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, var(--accent-soft), #faf9ff);
+    border: 1px solid #e2daff;
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin: 0 0 36px;
+  }
+  .contact-card .icon {
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .contact-card .label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .contact-card a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 17px;
+  }
+  .contact-card a:hover { text-decoration: underline; }
+  .contact-card .sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  /* Status banner (draft note, verbatim) */
+  .status-note {
+    background: #fff8ec;
+    border: 1px solid #f3e3c0;
+    border-left: 4px solid #e8a93d;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 14.5px;
+    color: #6b5516;
+    margin-bottom: 36px;
+  }
+  .status-note code, .status-note a { color: inherit; }
+  /* Body */
+  section.block { margin-bottom: 30px; }
+  section.block h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  section.block p { margin-bottom: 12px; font-size: 15.5px; }
+  ul.tight { margin: 0 0 12px 22px; }
+  ul.tight li { margin-bottom: 7px; font-size: 15.5px; }
+  strong { font-weight: 600; }
+  .lead { font-size: 15.5px; margin-bottom: 12px; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    border: 1px solid #e3e6ee;
+    border-radius: 5px;
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  /* Internal checklist footer */
+  .checklist {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+    color: var(--muted);
+    background: #fafbfd;
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .checklist strong { color: var(--ink); }
+  hr { border: none; border-top: 1px solid var(--line); margin: 32px 0; }
+  @media (max-width: 560px) {
+    .page { padding: 28px 18px 72px; }
+    header.hero h1 { font-size: 27px; }
+    .contact-card { flex-direction: column; align-items: flex-start; }
+  }
+  @media print {
+    body { font-size: 11pt; }
+    .page { max-width: 100%; padding: 20px 0; }
+    .contact-card, .status-note { break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <span class="eyebrow">Privacy Policy</span>
+    <h1>Scrollect Privacy Policy</h1>
+    <p class="effective-date"><strong>Effective date:</strong> August 4, 2026</p>
+  </header>
+
+  <!-- Clearly visible contact section -->
+  <div class="contact-card">
+    <div class="icon">&#9993;</div>
+    <div>
+      <div class="label">Contact us</div>
+      <a href="mailto:mdhamzakhan2k6@gmail.com">mdhamzakhan2k6@gmail.com</a>
+      <div class="sub">Questions about your data, rights requests, or account deletion</div>
+    </div>
+  </div>
+
+  <!-- Draft status note (verbatim from the source draft) -->
+  <div class="status-note">
+    <strong>Status:</strong> Draft v0.9 for counsel review — <em>not legal advice</em>. Review before publishing to the Play Store, the app dashboard, and Meta app review. <strong>Live at</strong> <a href="https://scrollect-privacy.vercel.app">https://scrollect-privacy.vercel.app</a> and linked from the Play listing + in-app Settings.
+  </div>
+
+  <section class="block">
+    <h2>1. Overview</h2>
+    <p>SCROLLECT ("we", "our", "the app") is an opt-in creator discovery network: a mobile app where you watch short-form videos ("Reels") contributed by creators who have chosen to share their own content through SCROLLECT. This policy explains what we collect, why, how we protect it, and how you can control it. We do <strong>not</strong> sell personal data and we do <strong>not</strong> scrape or collect data from Instagram without the content owner's explicit authorization.</p>
+  </section>
+
+  <section class="block">
+    <h2>2. What we collect</h2>
+    <p><strong>From viewers (you):</strong></p>
+    <ul class="tight">
+      <li>Account email and display name, if you create a SCROLLECT account.</li>
+      <li>Anonymous usage analytics (sessions, crashes, feature use) used only for stability and product quality.</li>
+      <li>Your chosen interest categories and in-app preferences (likes, saves, filters).</li>
+    </ul>
+    <p><strong>From creators (you):</strong></p>
+    <ul class="tight">
+      <li>Your Instagram handle and Instagram user ID, collected only when you authenticate through Instagram Login.</li>
+      <li>The Reels and associated metadata (caption, hashtags, thumbnail, statistics) that <strong>you</strong> authorize us to ingest via the official Instagram Graph API scope <code>instagram_basic</code>.</li>
+      <li>Your authorization state (whether you have connected, and whether you have revoked).</li>
+    </ul>
+    <p>We do <strong>not</strong> collect: precise location, contacts, SMS, call logs, device identifiers beyond standard crash/analytics identifiers, or any content from accounts that have not authorized us.</p>
+  </section>
+
+  <section class="block">
+    <h2>3. How we use data</h2>
+    <ul class="tight">
+      <li>To operate the app: show your interest-filtered feed, power likes/saves, and manage creator accounts.</li>
+      <li>To classify and moderate content: automated keyword and (optionally) AI analysis of creator-authorized media to assign category tags and detect prohibited content.</li>
+      <li>To communicate: essential service notices (e.g., "your Instagram connection is expiring").</li>
+      <li>To comply with law and to protect rights, including responding to takedown or DMCA requests.</li>
+    </ul>
+  </section>
+
+  <section class="block">
+    <h2>4. Legal bases (EU/UK users)</h2>
+    <p>We process personal data under the GDPR bases of consent (where you opt in, e.g., creator authorization), contract (providing the service you signed up for), legitimate interests (security, abuse prevention, product improvement), and legal obligation.</p>
+  </section>
+
+  <section class="block">
+    <h2>5. Storage &amp; security</h2>
+    <ul class="tight">
+      <li>Data is stored on encrypted infrastructure (database at rest encryption; tokens AES-256-GCM encrypted; TLS in transit).</li>
+      <li>Creator access tokens are stored <strong>server-side only</strong>, never on your device.</li>
+      <li>Access is limited to staff on a need-to-know basis; access is logged.</li>
+    </ul>
+  </section>
+
+  <section class="block">
+    <h2>6. Sharing &amp; processors</h2>
+    <p>We do not sell or rent personal data. We share only with processors who act on our instructions and contractually protect your data:</p>
+    <ul class="tight">
+      <li>Hosting &amp; database providers (e.g., our backend host and PostgreSQL provider).</li>
+      <li>Video streaming/CDN providers (we transmit creator-authorized videos to them for playback).</li>
+      <li>AI classification providers (creator-authorized media may be processed for tagging/moderation).</li>
+      <li>Analytics/crash reporting providers (anonymized metrics).</li>
+      <li>Meta Platforms, Inc. — as the source platform from which creators authorize content via Instagram Login; we share nothing with Meta beyond the API calls made on the creator's own behalf.</li>
+    </ul>
+  </section>
+
+  <section class="block">
+    <h2>7. Retention</h2>
+    <ul class="tight">
+      <li>Feed metadata and thumbnails: cached for up to 24 hours and refreshed on demand.</li>
+      <li>Creator content: retained for as long as the creator remains authorized and the content is valid, plus a short operational grace period.</li>
+      <li>Account data: retained while your account is active; deleted within <strong>30 days</strong> of account deletion.</li>
+      <li>Creator revocation: when a creator revokes access or leaves the network, their content is removed from the app within <strong>24 hours</strong>.</li>
+    </ul>
+  </section>
+
+  <section class="block">
+    <h2>8. Creator authorization &amp; revocation</h2>
+    <p>Your Reels remain <strong>your</strong> content. We store and display them only because you authorized us through Instagram Login. You can revoke at any time by (a) disconnecting in SCROLLECT Settings, or (b) revoking the app inside Instagram's settings. On revocation we remove your content within 24 hours.</p>
+  </section>
+
+  <section class="block">
+    <h2>9. Your rights</h2>
+    <p>Subject to applicable law, you may request: access, correction, portability, restriction, and deletion of your personal data; and you may withdraw consent or object to processing. To exercise rights: email <a href="mailto:mdhamzakhan2k6@gmail.com">mdhamzakhan2k6@gmail.com</a> (we respond within 30 days). California residents have CCPA/CPRA rights including "do not sell/sharing" (we do not sell). Where automated classification materially affects you, you may request human review.</p>
+  </section>
+
+  <section class="block">
+    <h2>10. Children</h2>
+    <p>SCROLLECT is not directed at children under 13 (16 in the EEA/UK). We do not knowingly collect their data. If you believe a child has provided data, contact us for deletion.</p>
+  </section>
+
+  <section class="block">
+    <h2>11. Changes &amp; contact</h2>
+    <p>We may update this policy and will post changes here. Material changes will be notified in-app. Contact: <a href="mailto:mdhamzakhan2k6@gmail.com">mdhamzakhan2k6@gmail.com</a>. Data controller: SCROLLECT (legal entity TBD — assign before publishing).</p>
+  </section>
+
+  <hr>
+
+  <!-- Internal note (verbatim from the source draft) -->
+  <div class="checklist">
+    <strong>Counsel review checklist:</strong> confirm (1) controller entity &amp; jurisdiction; (2) DPA with video CDN + AI processor; (3) cookie/analytics notices for the V2 web player; (4) DMCA agent designation for U.S. safe harbor; (5) country-specific disclosures (Brazil LGPD, etc.) before global launch.
+  </div>
+
+</div>
+</body>
+</html>

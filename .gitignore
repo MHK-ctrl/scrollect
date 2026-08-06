@@ -1,0 +1,28 @@
+# Backend
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+
+# Android
+build/
+.gradle/
+local.properties
+*.apk
+*.aab
+captures/
+.cxx/
+
+# Release signing — NEVER commit (see docs/LIVE-FLIP.md Phase B)
+keystore.properties
+*.jks
+*.keystore
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.iml

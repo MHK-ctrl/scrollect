@@ -1,0 +1,86 @@
+// SCROLLECT data model — mirrors the Db interface in src/lib/db/types.ts
+// Postgres + Prisma per SCROLLECT-SPEC.md §1.2. Retention/revocation rules: spec §2.5.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A creator who opted in via Instagram Login (Graph API scope: instagram_basic).
+/// Token stored ENCRYPTED (AES-256-GCM) as tokenRef — never plaintext.
+model Creator {
+  id                String    @id @default(cuid())
+  igUserId          String    @unique
+  username          String
+  accountType       String    @default("BUSINESS") // BUSINESS | CREATOR | PERSONAL
+  status            String    @default("active")   // active | expiring | refresh_failed | expired | revoked
+  tokenRef          String? // encrypted long-lived token (never logged)
+  tokenExpiresAt    DateTime?
+  lastSyncAt        DateTime?
+  lastMediaTimestamp DateTime?
+  media             Media[]
+  createdAt         DateTime  @default(now())
+}
+
+/// A single authorized Reel. status `published` => visible in feeds.
+/// cardMode = true when videoUrl was omitted by Instagram (licensed audio) => thumbnail+caption fallback.
+model Media {
+  id           String   @id @default(cuid())
+  creatorId    String
+  creator      Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  igMediaId    String
+  caption      String?  @db.Text
+  mediaType    String   @default("VIDEO") // IMAGE | VIDEO | CAROUSEL_ALBUM
+  mediaUrl     String?
+  thumbnailUrl String?
+  videoUrl     String? // absent for licensed-audio Reels -> isCardMode=true
+  permalink    String?
+  likeCount    Int      @default(0)
+  commentCount Int      @default(0)
+  timestamp    DateTime
+  categories   String[] @default([]) // classifier tags (multi-tag top-3, spec §3.2)
+  confidence   Float? // max confidence used to publish
+  moderation   String   @default("pending") // pending | approved | flagged | rejected
+  status       String   @default("ingested") // ingested | published | revoked | deleted
+  isCardMode   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  /// Set when status flips to `revoked` — purge runs exactly 24h after THIS, not createdAt (spec §2.5).
+  revokedAt    DateTime?
+  updatedAt    DateTime @updatedAt
+
+  @@unique([creatorId, igMediaId])
+  @@index([status, moderation])
+  @@index([categories])
+}
+
+/// Viewer account (device-scoped at MVP; email in V2).
+model User {
+  id        String   @id @default(cuid())
+  deviceId  String   @unique
+  interests String[] @default([])
+  likes     Like[]
+  saves     Save[]
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  userId    String
+  mediaId   String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@id([userId, mediaId])
+  @@index([mediaId])
+}
+
+model Save {
+  userId    String
+  mediaId   String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@id([userId, mediaId])
+  @@index([mediaId])
+}
