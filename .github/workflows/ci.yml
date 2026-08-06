@@ -1,9 +1,13 @@
 # SCROLLECT CI — backend typecheck/tests + Android mock/live builds.
 #
 # Design notes:
-#   • Triggers on push to `main` and every PR; docs-only changes skip CI entirely.
-#   • Per-job `paths` filters: a backend-only PR runs only Job A, an Android-only
-#     PR runs only Jobs B+C, a both-changed PR runs all three.
+#   • Triggers on push to `main` and every PR; docs-only changes skip CI entirely
+#     (workflow-level `paths-ignore` below).
+#   • GitHub Actions does NOT support job-level `paths` filters, so per-job
+#     scoping is done with dorny/paths-filter@v3: the `changes` job computes
+#     which areas changed, and each build job runs only if its area was touched.
+#     A backend-only PR runs only Job A; an Android-only PR runs Jobs B+C; a
+#     both-changed PR runs all three.
 #   • The live flavor never falls back to mock: if the SCROLLECT_LIVE_BASE_URL
 #     secret is unset, Job C fails with a clear message. (Known consequence: PRs
 #     from forks — which don't inherit repo secrets — will fail Job C by design.)
@@ -30,6 +34,37 @@ concurrency:
 
 jobs:
   # ---------------------------------------------------------------------------
+  # Gate — compute which project areas changed so each build job can opt in.
+  # ---------------------------------------------------------------------------
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      android: ${{ steps.changes.outputs.android }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # For push events, dorny/paths-filter compares against `before`;
+          # for the very first commit (all-zero base) every file counts as
+          # changed, which correctly runs all three jobs.
+          fetch-depth: 0
+
+      - name: Detect changed paths
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'shared/**'
+              - '.github/workflows/**'
+            android:
+              - 'android/**'
+              - '.github/workflows/**'
+
+  # ---------------------------------------------------------------------------
   # Job A — backend: typecheck + unit tests. No Postgres/Redis needed (tests run
   # against the in-memory Db / MockIgClient).
   # ---------------------------------------------------------------------------
@@ -37,11 +72,8 @@ jobs:
     name: Backend (typecheck + tests)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # backend-only PRs skip the Android jobs entirely
-    paths:
-      - 'backend/**'
-      - 'shared/**'
-      - '.github/workflows/ci.yml'
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     defaults:
       run:
         working-directory: backend
@@ -72,9 +104,8 @@ jobs:
     name: Android (mock)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    paths:
-      - 'android/**'
-      - '.github/workflows/ci.yml'
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
     defaults:
       run:
         working-directory: android
@@ -121,9 +152,8 @@ jobs:
     name: Android (live)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    paths:
-      - 'android/**'
-      - '.github/workflows/ci.yml'
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
     defaults:
       run:
         working-directory: android
