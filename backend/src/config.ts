@@ -26,12 +26,6 @@ function env(name: string, fallback?: string): string | undefined {
   return fallback;
 }
 
-function required(name: string): string {
-  const v = env(name);
-  if (!v) throw new Error(`Missing required env var: ${name} (see .env.example)`);
-  return v;
-}
-
 export function loadConfig(overrides: Partial<Config> = {}): Config {
   const nodeEnv = env('NODE_ENV', 'development') ?? 'development';
   const mockModeDefault = nodeEnv === 'production' ? false : true;

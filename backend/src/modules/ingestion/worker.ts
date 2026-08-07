@@ -14,7 +14,6 @@ export class IngestionScheduler {
       db: Db;
       logger: Logger;
       intervalMs?: number;
-      purgeIntervalMs?: number;
     },
   ) {}
 

@@ -1,18 +1,16 @@
 import { pino } from 'pino';
 
 /**
- * Logger with redaction so tokens/PII never reach logs (compliance: spec §2.2,
- * "Tokens ... masked in logs"; privacy policy §5).
- */
-/**
  * Pino options shared by the service logger and Fastify's own logger (spec §2.2:
  * tokens/PII are redacted everywhere, including request logs). Fastify v5's
  * `logger:` option only accepts a plain options object — not a logger instance.
  *
- * Structured logging: pino emits one JSON object per line in every environment,
- * so production logs are machine-parseable out of the box. `base` stamps every
- * line with the service name + environment for cheap cross-service correlation;
- * timestamps are ISO-8601 for human-readable pino-pretty output in dev.
+ * Redaction keeps tokens/PII out of logs (spec §2.2 "Tokens ... masked in
+ * logs"; privacy policy §5). Structured logging: pino emits one JSON object
+ * per line in every environment, so production logs are machine-parseable out
+ * of the box. `base` stamps every line with the service name + environment for
+ * cheap cross-service correlation; timestamps are ISO-8601 for readable
+ * pino-pretty output in dev.
  */
 export function loggerOptions(level: string, nodeEnv = 'development') {
   return {

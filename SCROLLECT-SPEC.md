@@ -191,7 +191,7 @@
 
 ### 2.4 Rate-limit budget & sync design
 
-**Rate limits:** Meta's current official Instagram Platform limit is impression-based — `Calls within 24 hours = 4800 × Number of Impressions` (developers.facebook.com/docs/graph-api/overview/rate-limiting). To stay safely inside it (and inside the older static 200 calls/user/hour cap), SCROLLECT budgets a conservative **200 calls per user per hour** as a hard floor, with **exponential backoff** on any throttling signal. Design targets the tighter interpretation.
+**Rate limits:** Meta's current official Instagram Platform limit is impression-based — `Calls within 24 hours = 4800 × Number of Impressions` (developers.facebook.com/docs/graph-api/overview/rate-limiting). To stay safely inside it, SCROLLECT additionally budgets a conservative **200 calls per user per hour** as a hard floor, with **exponential backoff** on any throttling signal. Design targets the tighter interpretation.
 
 - **One sync pass ≈ 51 calls** (1 list page `limit=50` + 50 detail calls). → a creator can be fully synced **~3×/hour** without touching other work.
 - **Steady state:** one sync per creator per **30 min** (≈2 calls/min budget). **Backfill:** on onboarding, 5-min loop × 4 passes (20 min catch-up).

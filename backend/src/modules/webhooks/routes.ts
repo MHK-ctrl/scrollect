@@ -37,35 +37,35 @@ function registerWebhookRoutes(app: FastifyInstance, deps: AppDeps): void {
     );
 
     webhook.post('/webhooks/instagram', async (req, reply) => {
-    const signature = req.headers['x-hub-signature-256'];
-    const raw = (req as { rawBody?: unknown }).rawBody;
-    if (typeof raw !== 'string' || typeof signature !== 'string') {
-      return reply.status(400).send({ error: { code: 'WEBHOOK_INVALID', message: 'missing signature or body' } });
-    }
-    const expected = 'sha256=' + createHmac('sha256', config.instagram.appSecret || 'dev-no-app-secret').update(raw).digest('hex');
-    const a = Buffer.from(signature);
-    const b = Buffer.from(expected);
-    if (a.length !== b.length || !timingSafeEqual(a, b)) {
-      logger.warn('webhook signature mismatch — dropped');
-      return reply.status(400).send({ error: { code: 'WEBHOOK_BAD_SIGNATURE', message: 'signature mismatch' } });
-    }
+      const signature = req.headers['x-hub-signature-256'];
+      const raw = (req as { rawBody?: unknown }).rawBody;
+      if (typeof raw !== 'string' || typeof signature !== 'string') {
+        return reply.status(400).send({ error: { code: 'WEBHOOK_INVALID', message: 'missing signature or body' } });
+      }
+      const expected = 'sha256=' + createHmac('sha256', config.instagram.appSecret || 'dev-no-app-secret').update(raw).digest('hex');
+      const a = Buffer.from(signature);
+      const b = Buffer.from(expected);
+      if (a.length !== b.length || !timingSafeEqual(a, b)) {
+        logger.warn('webhook signature mismatch — dropped');
+        return reply.status(400).send({ error: { code: 'WEBHOOK_BAD_SIGNATURE', message: 'signature mismatch' } });
+      }
 
-    let body: { entry?: { id?: string }[] };
-    try {
-      body = JSON.parse(raw);
-    } catch {
-      return reply.status(400).send({ error: { code: 'WEBHOOK_INVALID', message: 'invalid json' } });
-    }
+      let body: { entry?: { id?: string }[] };
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        return reply.status(400).send({ error: { code: 'WEBHOOK_INVALID', message: 'invalid json' } });
+      }
 
-    // entry[].id is the Instagram user id (IG Login). Kick an immediate sync.
-    for (const entry of body.entry ?? []) {
-      if (!entry.id) continue;
-      const creator = await db.getCreatorByIgId(entry.id);
-      if (!creator) continue;
-      sync.syncCreator(creator.id).catch((err) => logger.warn({ creatorId: creator.id, err: (err as Error).message }, 'webhook sync deferred'));
-    }
-    return reply.status(200).send({ received: true });
-  });
+      // entry[].id is the Instagram user id (IG Login). Kick an immediate sync.
+      for (const entry of body.entry ?? []) {
+        if (!entry.id) continue;
+        const creator = await db.getCreatorByIgId(entry.id);
+        if (!creator) continue;
+        sync.syncCreator(creator.id).catch((err) => logger.warn({ creatorId: creator.id, err: (err as Error).message }, 'webhook sync deferred'));
+      }
+      return reply.status(200).send({ received: true });
+    });
   });
 }
 

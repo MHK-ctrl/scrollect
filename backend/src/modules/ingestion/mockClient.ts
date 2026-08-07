@@ -58,7 +58,7 @@ export class MockIgClient implements IgClient {
     };
   }
 
-  async listMedia(token: string, igUserId: string, since?: string, limit = 50): Promise<IgListResult> {
+  async listMedia(token: string, _igUserId: string, since?: string, limit = 50): Promise<IgListResult> {
     const username = token.replace('mock-token-', '');
     const items = this.mediaFor(username)
       .filter((m) => (since ? new Date(m.timestamp).getTime() > new Date(since).getTime() : true))
