@@ -1,23 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Only resources referenced from code/manifest. The UI currently hardcodes
+         display text at call sites (V2 item: move to resources for i18n). -->
     <string name="app_name">SCROLLECT</string>
-    <string name="tagline">your feed. your rules.</string>
-    <string name="onboarding_welcome_title">Reels that match your vibe.</string>
-    <string name="onboarding_welcome_body">Pick your interests. We only show you opted-in creators posting exactly that. No noise feed.</string>
-    <string name="onboarding_get_started">Get started</string>
-    <string name="onboarding_pick_title">Pick your vibe</string>
-    <string name="onboarding_pick_hint">Choose 3–8 interests</string>
-    <string name="onboarding_surprise_me">Surprise me</string>
-    <string name="onboarding_cta">Start scrolling</string>
-    <string name="feed_for_you">For you</string>
-    <string name="settings_title">Settings</string>
-    <string name="retry">Retry</string>
-    <string name="empty_title">Nothing here yet</string>
-    <string name="explore_creators">Explore creators in %1$s →</string>
     <string name="offline_banner">You’re offline — showing saved picks</string>
-    <string name="error_generic">Something went wrong. Try again.</string>
-    <string name="like">Like</string>
-    <string name="save">Save</string>
-    <string name="share">Share</string>
-    <string name="report">Report</string>
 </resources>

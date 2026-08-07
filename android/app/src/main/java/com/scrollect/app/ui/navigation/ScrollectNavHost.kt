@@ -63,7 +63,3 @@ fun ScrollectNavHost() {
         }
     }
 }
-
-internal fun NavHostController.goToFeedClearingBackStack() {
-    navigate(Routes.FEED) { popUpTo(0) { inclusive = true } }
-}

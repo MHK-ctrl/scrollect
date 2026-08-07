@@ -70,12 +70,6 @@ data class InterestsResponse(val interests: List<String>)
 @Serializable
 data class CreatorResponse(val creator: CreatorDto, val media: List<FeedItemDto> = emptyList())
 
-@Serializable
-data class ErrorEnvelope(val error: ErrorBody? = null)
-
-@Serializable
-data class ErrorBody(val code: String = "", val message: String = "")
-
 interface ScrollectApi {
     @GET("api/v1/categories")
     suspend fun categories(): CategoriesResponse

@@ -27,9 +27,14 @@ class CreatorViewModel @Inject constructor(
         loadedFor.value = creatorId
         loading.value = true
         viewModelScope.launch {
-            creator.value = repository.getCreator(creatorId)
-            media.value = repository.getCreatorMedia(creatorId)
-            loading.value = false
+            try {
+                creator.value = repository.getCreator(creatorId)
+                media.value = repository.getCreatorMedia(creatorId)
+            } finally {
+                // Always clear the flag: a stuck `loading = true` shows the
+                // skeleton forever (same class of bug as the onboarding fix).
+                loading.value = false
+            }
         }
     }
 
