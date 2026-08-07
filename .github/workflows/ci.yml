@@ -118,10 +118,10 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK (cmdline-tools, API 35)
+      - name: Set up Android SDK (cmdline-tools + API 35)
         uses: android-actions/setup-android@v3
         with:
-          sdk-version: '35'
+          packages: 'platforms;android-35'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -168,10 +168,10 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK (cmdline-tools, API 35)
+      - name: Set up Android SDK (cmdline-tools + API 35)
         uses: android-actions/setup-android@v3
         with:
-          sdk-version: '35'
+          packages: 'platforms;android-35'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
