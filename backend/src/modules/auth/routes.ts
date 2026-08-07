@@ -60,7 +60,7 @@ function registerAuthRoutes(app: FastifyInstance, deps: AppDeps): void {
   app.post('/api/v1/auth/ig/start', async () => {
     const state = randomUUID();
     await cache.set(`ig:state:${state}`, '1', STATE_TTL_MS);
-    const url = `https://api.instagram.com/oauth/authorize?client_id=${config.instagram.appId}&redirect_uri=${encodeURIComponent(config.instagram.redirectUri)}&scope=instagram_basic&response_type=code&state=${state}`;
+    const url = `https://api.instagram.com/oauth/authorize?client_id=${config.instagram.appId}&redirect_uri=${encodeURIComponent(config.instagram.redirectUri)}&scope=instagram_business_basic&response_type=code&state=${state}`;
     return { authorizeUrl: url };
   });
 

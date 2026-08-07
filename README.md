@@ -18,6 +18,7 @@ scrollect/
 │   ├── play-store-review-notes.md     ← Play review notes + verbatim compliance statement
 │   ├── PLAY-LISTING.md                ← Play listing package (copy, data safety, rating)
 │   ├── LIVE-FLIP.md                   ← post-Meta-approval runbook (env, signing, sandbox, webhooks)
+│   ├── META-DASHBOARD-RUNBOOK.md       ← tap-by-tap dashboard steps: redirect URI, App Review, Business Verification
 │   └── CDN-DECISION.md                ← Mux vs Cloudflare Stream decision (spec §A.1)
 ├── backend/                           ← Node 20+/TS · Fastify · Prisma · BullMQ
 │   ├── src/                           ← config, lib (db, jwt, rateLimiter, tokenVault, cache), modules (auth, feed, interactions, moderation, ingestion, webhooks, classifier), seed
@@ -92,7 +93,9 @@ Tests: `./gradlew :app:testMockDebugUnitTest` (mock, offline) · `./gradlew :app
 
 1. Create a Meta app → Business type → add the Instagram product.
 2. **Business Verification** (required for Advanced Access; announced Feb 2023, enforced for new apps since Dec 2024) — start it Day 1, lead time 1–3 weeks.
-3. Add permissions `instagram_basic` + `instagram_content_publish`, request **Advanced Access** for each.
+3. Add permissions `instagram_business_basic` + `instagram_business_content_publish`, request **Advanced Access** for each.
+
+   > **Scope-name note:** `instagram_business_basic` is the current name of the permission formerly called `instagram_basic`; the App Review filing should request `instagram_business_basic`.
 4. Submit App Review with a video walkthrough of the OAuth + ingestion flow.
 5. Fill `INSTAGRAM_APP_ID` / `INSTAGRAM_APP_SECRET` / `INSTAGRAM_REDIRECT_URI` (+ `JWT_SECRET`, `ENCRYPTION_KEY`, `DATABASE_URL`, optional `REDIS_URL`) and set `MOCK_MODE=false`.
 

@@ -3,6 +3,8 @@
 Single source of truth for the HTTP API shared by `backend/` and `android/`.
 All responses use the error envelope below. Auth is `Authorization: Bearer <app JWT>`.
 
+Instagram Login uses the scope `instagram_business_basic` — the current name of the permission formerly called `instagram_basic`; the App Review filing should request `instagram_business_basic`. The authoritative permission/scope list lives in `SCROLLECT-SPEC.md` §1.4 / §2.1.
+
 ## Error envelope (every endpoint)
 ```json
 { "error": { "code": "NOT_FOUND|VALIDATION_ERROR|UNAUTHORIZED|FORBIDDEN|PERSONAL_ACCOUNT|...", "message": "...", "requestId": "..." } }

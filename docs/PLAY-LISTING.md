@@ -51,7 +51,7 @@ collect data from Instagram without explicit authorization, and it never will.
 Every video in the SCROLLECT feed is published by a creator who has (a)
 authenticated with their own Instagram account through the official Instagram
 Login, (b) granted access via the official Instagram Graph API scope
-instagram_basic, and (c) affirmatively opted in to distribution through
+instagram_business_basic, and (c) affirmatively opted in to distribution through
 SCROLLECT. Content is accessed exclusively through Meta's official, documented
 APIs in compliance with the Instagram Platform Policies. Creators may revoke
 access at any time, and SCROLLECT removes their content within 24 hours of
@@ -62,6 +62,11 @@ Privacy policy: https://scrollect-privacy.vercel.app
 
 > **Keywords for the description:** reels, short video, vertical video, curated
 > feed, interests, discover, creators, no noise feed, category feed.
+>
+> **Scope-name note:** `instagram_business_basic` is the current name of the
+> permission formerly called `instagram_basic`; the App Review filing should
+> request `instagram_business_basic` (the V2 publish permission is
+> `instagram_business_content_publish`, formerly `instagram_content_publish`).
 
 ---
 

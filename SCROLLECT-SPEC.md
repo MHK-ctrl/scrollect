@@ -24,7 +24,7 @@
 **Thesis to validate (drives MVP scope in §5):** *Interest-filtered discovery of opted-in creator content produces higher activation and retention than algorithmic noise.* Metrics: onboarding completion → first-feed engagement; D7/D30 retention; creators-willing-to-OAuth conversion.
 
 **Non-negotiable compliance posture (from prior legal research, do not contradict):**
-1. **No scraping. Ever.** Only official Meta APIs (`instagram_basic`, `instagram_content_publish`).
+1. **No scraping. Ever.** Only official Meta APIs (`instagram_business_basic`, `instagram_business_content_publish`).
 2. **No personal-feed access.** No official API exposes a user's personalized Reels feed → the app *cannot* be a feed-scraper by construction.
 3. **Opt-In Creator Network.** Creators authenticate via Instagram Login/Graph API; the app ingests *their authorized* media only.
 4. **Rate limits are real** — Meta's official Instagram Platform limit is impression-based (`Calls within 24h = 4800 × Number of Impressions`); SCROLLECT additionally budgets a conservative **200 calls/user/hour** floor with exponential backoff. Ingestion is incremental (`since`-based), webhook-assisted, backoff-protected.
@@ -44,8 +44,8 @@
  │ OAuth consent screen      │                          │ Splash → Onboarding → Feed    │
  └─────────────┬─────────────┘                          │ VerticalPager + Media3 · pills│
                │ 1. OAuth authorize                       │ like/save · creator sheet     │
-               │    (scopes: instagram_basic[,            │ settings                      │
-               │     instagram_content_publish])          └───────────────┬───────────────┘
+               │    (scopes: see §2.1)                    │ settings                      │
+               │                                          └───────────────┬───────────────┘
                ▼                                                          │ 6. JWT API calls
  ┌────────────────────────────────────────────────────────────────────────┴──────────────┐
  │                              BACKEND (Node.js 22 + TS, Fly.io/Railway)                │
@@ -105,12 +105,12 @@
 
 | Capability | Endpoint | Scope | When |
 |---|---|---|---|
-| Creator identity | `GET /me?fields=user_id,username,account_type,media_count` | `instagram_basic` | Post-OAuth |
-| List own media (incremental) | `GET /{ig-user-id}/media?fields=id,timestamp&since=&until=&limit=50` | `instagram_basic` | Sync worker |
-| Media detail | `GET /{media-id}?fields=id,caption,media_type,media_url,thumbnail_url,video_url,permalink,timestamp,like_count,comments_count` | `instagram_basic` | Ingestion |
+| Creator identity | `GET /me?fields=user_id,username,account_type,media_count` | `instagram_business_basic` | Post-OAuth |
+| List own media (incremental) | `GET /{ig-user-id}/media?fields=id,timestamp&since=&until=&limit=50` | `instagram_business_basic` | Sync worker |
+| Media detail | `GET /{media-id}?fields=id,caption,media_type,media_url,thumbnail_url,video_url,permalink,timestamp,like_count,comments_count` | `instagram_business_basic` | Ingestion |
 | **OAuth** | `https://api.instagram.com/oauth/authorize` + `/oauth/access_token` + `/graph.instagram.com/access_token` (`ig_exchange_token`) | — | Creator onboarding |
 | Webhooks (V2, optional) | `comments` / `mentions` / `messaging` subscriptions (documented fields; a new-media push field is not standard — verify before V2) | `instagram_manage_comments` (comments) | Push-style refresh |
-| Publish-to-IG ("share back") | `POST /{ig-user-id}/media` → `POST /{media-id}/media_publish` | `instagram_content_publish` | V2 feature |
+| Publish-to-IG ("share back") | `POST /{ig-user-id}/media` → `POST /{media-id}/media_publish` | `instagram_business_content_publish` | V2 feature |
 
 **Blocked / never used (with reason):**
 
@@ -144,8 +144,10 @@
 
 1. **Create a Meta Business Portfolio** (business.facebook.com). Required for Instagram Login apps.
 2. **Create an app** with type **Business**, then add the **Instagram** product → choose **"Instagram API with Instagram Login"**.
-3. **Configure OAuth:** add `https://api.scrollect.app/auth/ig/callback` to *Valid OAuth Redirect URIs*; enable *Client OAuth* + *Web OAuth Login*; add the SCROLLECT domain to *Valid OAuth domains*.
-4. **Request permissions:** `instagram_basic` (required) + `instagram_content_publish` (only if V2 share-back ships; request only what you ship — reviewers check).
+3. **Configure OAuth:** add `https://api.scrollect.app/api/v1/auth/ig/callback` to *Valid OAuth Redirect URIs*; enable *Client OAuth* + *Web OAuth Login*; add the SCROLLECT domain to *Valid OAuth domains*.
+4. **Request permissions:** `instagram_business_basic` (required) + `instagram_business_content_publish` (only if V2 share-back ships; request only what you ship — reviewers check).
+
+   > **Scope-name note:** `instagram_business_basic` is the current name of the permission formerly called `instagram_basic`; the App Review filing should request `instagram_business_basic`. Likewise, the V2 publish permission is now `instagram_business_content_publish` (formerly `instagram_content_publish`).
 5. **Development mode:** standard access works for app admins/roles/testers — enough to build and demo.
 6. **App Review:** submit each permission with a screencast of the real flow + written use case ("we read a creator's own Reels metadata only after they opt in via Instagram Login, to power a category feed"). Provide 2 test accounts.
 7. **Advanced Access** is granted per permission after approval (turns on Live mode for real users).
@@ -155,8 +157,8 @@
 
 ```
 [Client]  →  https://api.instagram.com/oauth/authorize
-             ?client_id={APP_ID}&redirect_uri=https://api.scrollect.app/auth/ig/callback
-             &scope=instagram_basic&response_type=code&state={CSRF_state}
+             ?client_id={APP_ID}&redirect_uri=https://api.scrollect.app/api/v1/auth/ig/callback
+             &scope=instagram_business_basic&response_type=code&state={CSRF_state}
 [Creator] grants consent on Instagram
 [Client]  →  POST https://api.instagram.com/oauth/access_token
              {client_id, client_secret, grant_type=authorization_code,
@@ -209,7 +211,7 @@
 
 > **SCROLLECT compliance statement (include verbatim in Play Store review notes and privacy policy):**
 >
-> SCROLLECT is an opt-in creator discovery network. It does **not** scrape, crawl, or collect data from Instagram without explicit authorization, and it never will. Every video in the SCROLLECT feed is published by a creator who has (a) authenticated with their own Instagram account through the official Instagram Login, (b) granted access via the official Instagram Graph API scope `instagram_basic`, and (c) affirmatively opted in to distribution through SCROLLECT. Content is accessed exclusively through Meta's official, documented APIs in compliance with the Instagram Platform Policies. SCROLLECT never: collects personal feeds or recommendations; accesses private accounts; uses headless browsers, proxies, unofficial endpoints, or credential stuffing; bypasses or evades rate limits; or redistributes content without the creator's authorization. Creators may revoke access at any time, and SCROLLECT removes their content within 24 hours of revocation.
+> SCROLLECT is an opt-in creator discovery network. It does **not** scrape, crawl, or collect data from Instagram without explicit authorization, and it never will. Every video in the SCROLLECT feed is published by a creator who has (a) authenticated with their own Instagram account through the official Instagram Login, (b) granted access via the official Instagram Graph API scope `instagram_business_basic`, and (c) affirmatively opted in to distribution through SCROLLECT. Content is accessed exclusively through Meta's official, documented APIs in compliance with the Instagram Platform Policies. SCROLLECT never: collects personal feeds or recommendations; accesses private accounts; uses headless browsers, proxies, unofficial endpoints, or credential stuffing; bypasses or evades rate limits; or redistributes content without the creator's authorization. Creators may revoke access at any time, and SCROLLECT removes their content within 24 hours of revocation.
 
 ---
 
@@ -433,7 +435,7 @@ Surfaces & depth toolkit: glass cards · animated **aurora/mesh gradients** (5�
 | Creator payouts + analytics dashboard | Charts from `freebuff-pro-ui` (§4.2 #20) |
 | Light mode + dynamic color polish | Scheme already tokenized |
 | Tablet / iPad layout + web player | Web player reuses `freebuff-pro-ui` components directly |
-| Share-to-IG (publish back) | `instagram_content_publish` scope |
+| Share-to-IG (publish back) | `instagram_business_content_publish` scope |
 | “Ask your feed” AI assistant | `ChatUI`-parity, V2 |
 
 ---
@@ -484,7 +486,7 @@ Surfaces & depth toolkit: glass cards · animated **aurora/mesh gradients** (5�
 4. ✅ **Data safety form** (§7.2).
 5. ✅ **Privacy policy URL** (public; `docs/privacy-policy-draft.md` → hosted at `https://scrollect.app/privacy`).
 6. ✅ **Permissions rationale** — only: `INTERNET` (network), `ACCESS_NETWORK_STATE` (offline detection), `POST_NOTIFICATIONS` (V2, runtime-granted). No other permissions. Haptics need none.
-7. ✅ **Meta compliance disclosure** in review notes: paste §2.6 verbatim + explain Instagram Graph API usage (permission `instagram_basic`, opt-in only, no scraping).
+7. ✅ **Meta compliance disclosure** in review notes: paste §2.6 verbatim + explain Instagram Graph API usage (permission `instagram_business_basic`, opt-in only, no scraping).
 8. ✅ UGC moderation described (auto-scan + review queue + report + 24h takedown + DMCA process).
 9. ✅ App category: Entertainment/Video Players; “In-app purchases: none”; “Ads: none”; “Personal info: email (accounts), video content (creators), user IDs”.
 10. ✅ Screenshots + promo video + store copy (Gen-Z tone); data-deletion instructions linked.

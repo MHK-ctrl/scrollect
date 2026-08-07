@@ -1,7 +1,7 @@
 # SCROLLECT — LIVE-FLIP Runbook (post-approval)
 
 **Audience:** the whole team. **When:** after Meta App Review grants Advanced
-Access for `instagram_basic` (and Business Verification completes). Until then,
+Access for `instagram_business_basic` (and Business Verification completes). Until then,
 the app ships in **MOCK_MODE** with zero Meta credentials — do not flip anything
 below early; live mode fails fast on missing config by design.
 
@@ -9,6 +9,10 @@ below early; live mode fails fast on missing config by design.
 token lifecycle) · `docs/privacy-policy-draft.md` (live at
 `https://scrollect-privacy.vercel.app`) · `docs/play-store-review-notes.md`
 (compliance statements) · `docs/PLAY-LISTING.md` (store package).
+
+> **Scope-name note:** `instagram_business_basic` is the current name of the
+> permission formerly called `instagram_basic`; the App Review filing should
+> request `instagram_business_basic`.
 
 ---
 

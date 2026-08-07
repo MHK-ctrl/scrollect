@@ -1,6 +1,6 @@
 # SCROLLECT — Privacy Policy Draft
 
-**Status:** Draft v0.9 for counsel review — *not legal advice*. Review before publishing to the Play Store, the app dashboard, and Meta app review. **Live at `https://scrollect-privacy.vercel.app`** and linked from the Play listing + in-app Settings.
+**Status:** Draft v0.9 for counsel review — *not legal advice*. Review before publishing to the Play Store, the app dashboard, and Meta app review. **Live at `https://scrollect-privacy.vercel.app`** and linked from the Play listing + in-app Settings. *Scope-name note: `instagram_business_basic` is the current name of the permission formerly called `instagram_basic`; the App Review filing should request `instagram_business_basic`.*
 
 ---
 
@@ -17,7 +17,7 @@ SCROLLECT ("we", "our", "the app") is an opt-in creator discovery network: a mob
 
 **From creators (you):**
 - Your Instagram handle and Instagram user ID, collected only when you authenticate through Instagram Login.
-- The Reels and associated metadata (caption, hashtags, thumbnail, statistics) that **you** authorize us to ingest via the official Instagram Graph API scope `instagram_basic`.
+- The Reels and associated metadata (caption, hashtags, thumbnail, statistics) that **you** authorize us to ingest via the official Instagram Graph API scope `instagram_business_basic`.
 - Your authorization state (whether you have connected, and whether you have revoked).
 
 We do **not** collect: precise location, contacts, SMS, call logs, device identifiers beyond standard crash/analytics identifiers, or any content from accounts that have not authorized us.

@@ -6,14 +6,16 @@
 
 ## 1. Meta compliance statement (verbatim — paste into Play review notes AND Meta app review)
 
-> SCROLLECT is an opt-in creator discovery network. It does **not** scrape, crawl, or collect data from Instagram without explicit authorization, and it never will. Every video in the SCROLLECT feed is published by a creator who has (a) authenticated with their own Instagram account through the official Instagram Login, (b) granted access via the official Instagram Graph API scope `instagram_basic`, and (c) affirmatively opted in to distribution through SCROLLECT. Content is accessed exclusively through Meta's official, documented APIs in compliance with the Instagram Platform Policies. SCROLLECT never: collects personal feeds or recommendations; accesses private accounts; uses headless browsers, proxies, unofficial endpoints, or credential stuffing; bypasses or evades rate limits; or redistributes content without the creator's authorization. Creators may revoke access at any time, and SCROLLECT removes their content within 24 hours of revocation.
+> SCROLLECT is an opt-in creator discovery network. It does **not** scrape, crawl, or collect data from Instagram without explicit authorization, and it never will. Every video in the SCROLLECT feed is published by a creator who has (a) authenticated with their own Instagram account through the official Instagram Login, (b) granted access via the official Instagram Graph API scope `instagram_business_basic`, and (c) affirmatively opted in to distribution through SCROLLECT. Content is accessed exclusively through Meta's official, documented APIs in compliance with the Instagram Platform Policies. SCROLLECT never: collects personal feeds or recommendations; accesses private accounts; uses headless browsers, proxies, unofficial endpoints, or credential stuffing; bypasses or evades rate limits; or redistributes content without the creator's authorization. Creators may revoke access at any time, and SCROLLECT removes their content within 24 hours of revocation.
 
 ## 2. API disclosure (for Meta App Review — permissions requested)
 
 | Permission | Purpose | Scope of use |
 |---|---|---|
-| `instagram_basic` | Read the **creator's own** media metadata (caption, hashtags, thumbnail, stats) after they opt in via Instagram Login, to power the SCROLLECT category feed | Only the authenticated user's own media; no feed aggregation, no third-party content |
-| `instagram_content_publish` (V2 only) | Let creators optionally post a highlight back to their own Instagram | Requested only when the feature ships |
+| `instagram_business_basic` | Read the **creator's own** media metadata (caption, hashtags, thumbnail, stats) after they opt in via Instagram Login, to power the SCROLLECT category feed | Only the authenticated user's own media; no feed aggregation, no third-party content |
+| `instagram_business_content_publish` (V2 only) | Let creators optionally post a highlight back to their own Instagram | Requested only when the feature ships |
+
+> **Scope-name note:** `instagram_business_basic` is the current name of the permission formerly called `instagram_basic`; the App Review filing should request `instagram_business_basic` (Meta renamed the Instagram Graph API permissions; the publish scope is likewise `instagram_business_content_publish`, formerly `instagram_content_publish`).
 
 Provide in App Review: 2 test accounts + a screencast walking through: connect → consent screen → feed shows the creator's own Reels → revoke → content removed within 24h.
 
