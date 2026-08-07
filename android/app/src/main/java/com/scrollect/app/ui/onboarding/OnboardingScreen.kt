@@ -62,11 +62,15 @@ fun OnboardingScreen(onDone: () -> Unit) {
     val selected by viewModel.selected.collectAsState()
     val categories by viewModel.categories.collectAsState()
     val saving by viewModel.saving.collectAsState()
+    val done by viewModel.done.collectAsState()
     val context = LocalContext.current
     val reduceMotion = isReduceMotionEnabled(context)
 
-    LaunchedEffect(viewModel.done) {
-        if (viewModel.done.value) onDone()
+    // Key on the VALUE, not the StateFlow object: keying on the flow instance
+    // never re-runs the effect, so navigation never fired after `done` flipped
+    // true and the RefineStep hung on a disabled "Loading…" button.
+    LaunchedEffect(done) {
+        if (done) onDone()
     }
 
     Box(Modifier.fillMaxSize()) {

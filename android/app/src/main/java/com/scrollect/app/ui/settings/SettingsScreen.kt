@@ -56,10 +56,14 @@ fun SettingsScreen(onBack: () -> Unit, onLoggedOut: () -> Unit) {
     val categories by viewModel.categories.collectAsState()
     val interests by viewModel.interests.collectAsState()
     val hideCardMode by viewModel.hideCardMode.collectAsState()
+    val deleted by viewModel.deleted.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(viewModel.deleted) {
-        if (viewModel.deleted.value) onLoggedOut()
+    // Key on the VALUE, not the StateFlow object (same hang class as the
+    // onboarding bug): keying on the flow instance never re-runs after `deleted`
+    // flips true, so account deletion never navigates away.
+    LaunchedEffect(deleted) {
+        if (deleted) onLoggedOut()
     }
 
     Box(Modifier.fillMaxSize().background(Background)) {

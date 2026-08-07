@@ -57,11 +57,17 @@ class OnboardingViewModel @Inject constructor(
         if (saving.value) return
         viewModelScope.launch {
             saving.value = true
-            val interests = selected.value.toList()
-            session.setInterests(interests)
-            repository.setInterests(interests)
-            session.setOnboardingCompleted()
-            _done.value = true
+            try {
+                val interests = selected.value.toList()
+                session.setInterests(interests)
+                repository.setInterests(interests)
+                session.setOnboardingCompleted()
+                _done.value = true
+            } finally {
+                // Always clear the flag: a stuck `saving = true` keeps the
+                // RefineStep button disabled ("Loading…") forever.
+                saving.value = false
+            }
         }
     }
 }
