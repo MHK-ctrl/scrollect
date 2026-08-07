@@ -218,11 +218,21 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
+    // Compose UI tests on Robolectric (feed-entry regression: empty + seeded).
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.ui.test.junit4)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.runner)
+    // Pin androidx.tracing to 1.1.0: compose ui-test's EspressoLink calls
+    // Trace.forceEnableAppTracing() (added in tracing 1.1.0), but activity 1.9.2
+    // pins tracing 1.0.0 and AGP consistent-resolution propagates that into the
+    // androidTest config, breaking Espresso idling in instrumented tests (the
+    // splash effect never advances). debugImplementation bumps it for the debug
+    // APK the instrumented tests run against; release builds stay untouched.
+    debugImplementation(libs.androidx.tracing)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

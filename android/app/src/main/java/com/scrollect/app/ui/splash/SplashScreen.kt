@@ -32,8 +32,10 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 /**
  * Splash (spec §4.4.1): aurora + wordmark + tagline; min 1.2s, tap to skip.
@@ -52,7 +54,8 @@ fun SplashScreen(onDone: (Boolean) -> Unit) {
         delay(1200)
         val done = entryPoint.sessionManager().onboardingCompletedFlow.first()
         completed = done
-        onDone(done)
+        // Navigation must run on the main thread (NavController enforces it).
+        withContext(Dispatchers.Main.immediate) { onDone(done) }
     }
 
     val fade = remember { Animatable(0f) }

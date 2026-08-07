@@ -2,6 +2,7 @@ package com.scrollect.app
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -37,6 +38,15 @@ class FeedSmokeTest {
 
     @Test
     fun onboardingToFeedRendersSeededData() {
+        // Step 0 — the ActivityScenario bridge (EmptyActivity -> MainActivity)
+        // plus the splash's 1.2s delay + DataStore read can take several seconds
+        // on a cold emulator. waitUntil() pumps via Espresso on the main thread
+        // (safe for the splash's navigation), so poll for the onboarding screen
+        // instead of guessing a sleep.
+        composeRule.waitUntil(timeoutMillis = 30_000) {
+            composeRule.onAllNodesWithText("Get started").fetchSemanticsNodes().isNotEmpty()
+        }
+
         // Step 1 — welcome
         composeRule.onNodeWithText("Get started").performClick()
 
@@ -46,10 +56,16 @@ class FeedSmokeTest {
         composeRule.onNodeWithTag("category-food").performClick()
         composeRule.onNodeWithText("Continue").performClick()
 
-        // Step 3 — land in the first feed
+        // Step 3 — "Start scrolling" resolves interests (DataStore writes +
+        // navigation). Poll for the button before clicking.
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodesWithText("Start scrolling").fetchSemanticsNodes().isNotEmpty()
+        }
         composeRule.onNodeWithText("Start scrolling").performClick()
 
-        // Feed renders: pill row + at least one seeded Reel page
+        // Feed renders: pill row + at least one seeded Reel page (no crash at
+        // feed entry — regression for the IndexOutOfBoundsException from
+        // unguarded `pagingItems[currentPage]` on an empty Paging PageStore).
         composeRule.onNodeWithTag("pill-row").assertExists()
         composeRule.waitUntil(timeoutMillis = 20_000) {
             composeRule.onAllNodesWithTag("feed-item").fetchSemanticsNodes().isNotEmpty()

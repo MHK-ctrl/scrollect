@@ -66,6 +66,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,6 +75,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -81,9 +83,9 @@ import com.scrollect.app.core.data.model.Category
 import com.scrollect.app.core.data.model.FeedItem
 import com.scrollect.app.core.util.formatCount
 import com.scrollect.app.core.util.isReduceMotionEnabled
-import com.scrollect.app.ui.components.EmptyState
 import com.scrollect.app.ui.components.ErrorState
 import com.scrollect.app.ui.components.FeedSkeleton
+import com.scrollect.app.ui.components.GradientButton
 import com.scrollect.app.ui.components.HeartBurst
 import com.scrollect.app.ui.components.PillChip
 import com.scrollect.app.ui.components.ShimmerSkeleton
@@ -101,8 +103,12 @@ import com.scrollect.app.ui.theme.TextSecondary
  */
 @OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
-fun FeedScreen(onOpenCreator: (String) -> Unit, onOpenSettings: () -> Unit) {
-    val viewModel: FeedViewModel = hiltViewModel()
+fun FeedScreen(
+    onOpenCreator: (String) -> Unit,
+    onOpenSettings: () -> Unit,
+    // Default keeps call sites (nav host) unchanged; tests inject a real ViewModel.
+    viewModel: FeedViewModel = hiltViewModel(),
+) {
     val categories by viewModel.categories.collectAsState()
     val activeCats by viewModel.activeCategories.collectAsState()
 
@@ -117,8 +123,20 @@ fun FeedScreen(onOpenCreator: (String) -> Unit, onOpenSettings: () -> Unit) {
     val currentPage = pagerState.currentPage
 
     // Drive the player from the current page; preload the next playable item.
-    LaunchedEffect(currentPage, activeCats) {
-        val item = pagingItems[currentPage]
+    // Regression guard (feed-entry crash): Paging 3's get(index) throws
+    // IndexOutOfBoundsException (PageStore.checkIndex) when the PageStore is
+    // still empty — on the first frame of feed entry itemCount == 0, and the
+    // old `pagingItems[currentPage]` crashed before the first page emitted.
+    // itemAt() bounds-checks every access, and keying on `itemCount > 0` (a
+    // stable boolean) re-runs this effect once items arrive so the first Reel
+    // starts playback — while appends (12→20→28) keep the key true and never
+    // restart the video the user is currently watching.
+    LaunchedEffect(currentPage, activeCats, pagingItems.itemCount > 0) {
+        if (currentPage !in 0 until pagingItems.itemCount) {
+            player.pause()
+            return@LaunchedEffect
+        }
+        val item = pagingItems.itemAt(currentPage)
         if (item == null) { player.pause(); return@LaunchedEffect }
         if (!item.isCardMode && item.videoUrl != null) {
             player.setMediaItem(MediaItem.fromUri(item.videoUrl))
@@ -126,7 +144,7 @@ fun FeedScreen(onOpenCreator: (String) -> Unit, onOpenSettings: () -> Unit) {
             player.playWhenReady = true
             player.play()
             // Preload the next playable item into the playlist.
-            val next = pagingItems[currentPage + 1]
+            val next = pagingItems.itemAt(currentPage + 1)
             if (next != null && !next.isCardMode && next.videoUrl != null) {
                 player.addMediaItem(MediaItem.fromUri(next.videoUrl))
             }
@@ -171,12 +189,13 @@ fun FeedScreen(onOpenCreator: (String) -> Unit, onOpenSettings: () -> Unit) {
                     )
                     else -> {
                         if (pagingItems.itemCount == 0) {
-                            EmptyState(
-                                emoji = "🛸",
-                                title = "Nothing here yet",
-                                body = "We're onboarding creators for this vibe. Check another category or come back soon.",
-                                ctaText = "Browse all categories",
-                                onCta = { viewModel.selectCategory(null) },
+                            // Spec §4.4.7: an empty feed must render the designed
+                            // empty state (headline + adjacent-category suggestions),
+                            // never crash or show a blank screen.
+                            EmptyFeedState(
+                                categories = categories,
+                                activeSlug = activeCats.singleOrNull(),
+                                onSelectCategory = viewModel::selectCategory,
                                 modifier = Modifier.fillMaxSize(),
                             )
                         } else {
@@ -221,6 +240,63 @@ private fun PillRow(categories: List<Category>, active: List<String>, onSelect: 
         }
     }
 }
+
+/**
+ * Spec §4.4.7 empty state: headline + adjacent-category suggestion pills. Shown
+ * only after a refresh completes with zero items — the feed must never crash or
+ * render blank when a category has "not enough content" (the seeded mock always
+ * has content, but a filtered/live feed can legitimately be empty).
+ */
+@Composable
+private fun EmptyFeedState(
+    categories: List<Category>,
+    activeSlug: String?,
+    onSelectCategory: (String?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val active = activeSlug?.let { slug -> categories.firstOrNull { it.slug == slug } }
+    Column(
+        modifier.padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text("🛸", fontSize = 56.sp)
+        Spacer(Modifier.height(12.dp))
+        Text("Nothing here yet", style = MaterialTheme.typography.headlineMedium, color = TextPrimary)
+        Spacer(Modifier.height(6.dp))
+        Text(
+            if (active != null) {
+                "Not enough live Reels in ${active.label} yet — try a nearby topic."
+            } else {
+                "We're onboarding creators for this vibe. Check another category or come back soon."
+            },
+            style = MaterialTheme.typography.bodyLarge,
+            color = TextSecondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
+        val adjacent = active?.adjacent.orEmpty()
+            .mapNotNull { slug -> categories.firstOrNull { it.slug == slug } }
+        if (adjacent.isNotEmpty()) {
+            Spacer(Modifier.height(16.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                adjacent.forEach { c ->
+                    PillChip(label = c.label, emoji = c.emoji, selected = false, onClick = { onSelectCategory(c.slug) })
+                }
+            }
+        }
+        Spacer(Modifier.height(20.dp))
+        GradientButton(text = "Browse all categories", onClick = { onSelectCategory(null) }, fullWidth = false)
+    }
+}
+
+/**
+ * Bounds-checked Paging access. Paging 3's [get] throws IndexOutOfBoundsException
+ * from PageStore.checkIndex when the PageStore is empty or the index is out of
+ * range — always guard with this instead of raw `pagingItems[i]`.
+ */
+private fun <T : Any> LazyPagingItems<T>.itemAt(index: Int): T? =
+    if (index in 0 until itemCount) get(index) else null
 
 @Composable
 internal fun ReelPage(

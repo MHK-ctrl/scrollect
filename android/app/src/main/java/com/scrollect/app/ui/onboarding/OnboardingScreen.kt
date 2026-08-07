@@ -54,6 +54,8 @@ import com.scrollect.app.ui.theme.GlassScrim
 import com.scrollect.app.ui.theme.TextPrimary
 import com.scrollect.app.ui.theme.TextSecondary
 import com.scrollect.app.ui.theme.Volt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun OnboardingScreen(onDone: () -> Unit) {
@@ -69,8 +71,12 @@ fun OnboardingScreen(onDone: () -> Unit) {
     // Key on the VALUE, not the StateFlow object: keying on the flow instance
     // never re-runs the effect, so navigation never fired after `done` flipped
     // true and the RefineStep hung on a disabled "Loading…" button.
+    // Navigation must always run on the main thread (NavController enforces it
+    // and would otherwise crash); in production effects already run on main, so
+    // withContext(Main.immediate) is a no-op there but keeps the nav safe under
+    // any dispatcher (including compose test harnesses).
     LaunchedEffect(done) {
-        if (done) onDone()
+        if (done) withContext(Dispatchers.Main.immediate) { onDone() }
     }
 
     Box(Modifier.fillMaxSize()) {

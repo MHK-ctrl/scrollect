@@ -48,6 +48,8 @@ import com.scrollect.app.ui.theme.GlassScrim
 import com.scrollect.app.ui.theme.TextPrimary
 import com.scrollect.app.ui.theme.TextSecondary
 import com.scrollect.app.ui.theme.Volt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** Settings (spec §4.4.6): live interest management, content filters, data & privacy. */
 @Composable
@@ -62,8 +64,9 @@ fun SettingsScreen(onBack: () -> Unit, onLoggedOut: () -> Unit) {
     // Key on the VALUE, not the StateFlow object (same hang class as the
     // onboarding bug): keying on the flow instance never re-runs after `deleted`
     // flips true, so account deletion never navigates away.
+    // Navigation must run on the main thread (NavController enforces it).
     LaunchedEffect(deleted) {
-        if (deleted) onLoggedOut()
+        if (deleted) withContext(Dispatchers.Main.immediate) { onLoggedOut() }
     }
 
     Box(Modifier.fillMaxSize().background(Background)) {
